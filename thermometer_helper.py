@@ -37,7 +37,7 @@ class Thermometer_GFX(displayio.Group):
         board.DISPLAY.show(self._icon_group)
 
         # create text object group
-        self._text_group = displayio.Group(max_size=10)
+        self._text_group = displayio.Group(max_size=11)
         self.append(self._text_group)
 
         self._icon_sprite = None
@@ -60,34 +60,34 @@ class Thermometer_GFX(displayio.Group):
         print('setting up labels...')
 
         self.date_text = Label(self.info_font, max_glyphs=40)
-        self.date_text.x = 120
+        self.date_text.x = 90
         self.date_text.y = 15
         self._text_group.append(self.date_text)
 
         self.time_text = Label(self.info_font, max_glyphs=40)
-        self.time_text.x = 138
+        self.time_text.x = 115
         self.time_text.y = 35
         self._text_group.append(self.time_text)
 
         self.city1_name = Label(self.small_font, max_glyphs=40)
         self.city1_name.x = 12
-        self.city1_name.y = 80
+        self.city1_name.y = 100
         self._text_group.append(self.city1_name)
 
         self.city1_temp = Label(self.small_font, max_glyphs=40)
         self.city1_temp.x = 12
-        self.city1_temp.y = 100
+        self.city1_temp.y = 120
         self._text_group.append(self.city1_temp)
 
         self.city2_name = Label(self.small_font, max_glyphs=40)
-        self.city2_name.x = 240
-        self.city2_name.y = 80
+        self.city2_name.x = 190
+        self.city2_name.y = 100
         self._text_group.append(self.city2_name)
 
         self.city2_temp = Label(self.small_font, max_glyphs=40)
-        self.city2_temp.x = 240
-        self.city2_temp.y = 100
-        self._text_group.append(self.city1_temp)
+        self.city2_temp.x = 190
+        self.city2_temp.y = 120
+        self._text_group.append(self.city2_temp)
 
         self.title_text = Label(self.info_font, text="Rosie's Home Portal")
         self.title_text.x = 30
@@ -108,8 +108,8 @@ class Thermometer_GFX(displayio.Group):
         self._text_group.append(self.io_status_text)
 
         # add flag images to the text group
-        self.add_flag("/icons/brit.bmp", 12, 24)
-        self.add_flag("/icons/finn.bmp", 240, 24)
+        self.add_flag("/icons/brit.bmp", 12, 36)
+        self.add_flag("/icons/finn.bmp", 190, 36)
 
 
         board.DISPLAY.show(self._text_group)
@@ -168,10 +168,20 @@ class Thermometer_GFX(displayio.Group):
         temp_kelvin = temp_string[2]
         temp = float(temp_kelvin) - 273.15
         temp = (round(temp, 2))
+
+        colour = 0xFFFFFF # default white temperature colour
+
+        if temp < 0:
+            colour = 0x00FFFF # set colour to cyan if sub zero
+
+        if temp > 25:
+            colour = 0xff7700 # set colour orange if over 25C
         
         if cityNum == 1:
+            self.city1_temp.color = colour
             self.city1_temp.text = str(temp)+"C"
         elif cityNum == 2:
+            self.city2_temp.color = colour
             self.city2_temp.text = str(temp)+"C"
 
 
