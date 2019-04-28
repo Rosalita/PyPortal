@@ -51,6 +51,11 @@ except KeyError:
     raise KeyError('To use this code, you need to include your Adafruit IO username \
 and password in a secrets.py file on the CIRCUITPY drive.')
 
+# use https://openweathermap.org/find?q= to get city IDs
+# then set both city IDs below
+CITY_1_ID = '2641673'
+CITY_2_ID = '658225'
+
 # Create an instance of the Adafruit IO REST client
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
@@ -95,10 +100,17 @@ while True:
         print('displaying time...')
         gfx.display_date_time(datetime)
 
-        NCL_URL = "http://api.openweathermap.org/data/2.5/weather?id=2641673&APPID="+OPEN_WEATHER_KEY
-        print("Fetching text from", NCL_URL)
-        r = requests.get(NCL_URL)
-        gfx.display_io_status(r.text)
+        CITY_1_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_1_ID+"&APPID="+OPEN_WEATHER_KEY
+        print("Fetching text from", CITY_1_URL)
+        r = requests.get(CITY_1_URL)
+        gfx.display_city_name(r.text, 1)
+        gfx.display_city_temp(r.text, 1)
+
+        CITY_2_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_2_ID+"&APPID="+OPEN_WEATHER_KEY
+        print("Fetching text from", CITY_2_URL)
+        r = requests.get(CITY_2_URL)
+        gfx.display_city_name(r.text, 2)
+        gfx.display_city_temp(r.text, 2)
 
 
         # try: # send temperature data to IO
