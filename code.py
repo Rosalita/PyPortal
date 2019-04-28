@@ -59,8 +59,6 @@ CITY_2_ID = '658225'
 # Create an instance of the Adafruit IO REST client
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
 
-# Get the temperature feed from Adafruit IO
-# temperature_feed = io.get_feed('temperature')
 
 # init. graphics helper
 gfx = thermometer_helper.Thermometer_GFX(celsius=True)
@@ -84,17 +82,11 @@ def set_backlight(val):
     board.DISPLAY.brightness = val
 
 while True:
-    # read the light sensor
-    # light_value = light_sensor.value
-    # print('Light Value: ', light_value)
-    # read the temperature sensor
-    # temperature = adt.temperature
+
     
     try: # WiFi Connection
         set_backlight(1)
-        # print('displaying temperature...')
-        # gfx.display_temp(temperature)
-        # Get and display date and time form Adafruit IO
+
         print('Getting time from Adafruit IO...')
         datetime = io.receive_time()
         print('displaying time...')
@@ -105,22 +97,21 @@ while True:
         r = requests.get(CITY_1_URL)
         gfx.display_city_name(r.text, 1)
         gfx.display_city_temp(r.text, 1)
+        gfx.display_weather_desc(r.text, 1)
+        gfx.display_humid(r.text, 1)
+        gfx.display_wind(r.text, 1)
+        gfx.display_sun(r.text, 1)
 
         CITY_2_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_2_ID+"&APPID="+OPEN_WEATHER_KEY
         print("Fetching text from", CITY_2_URL)
         r = requests.get(CITY_2_URL)
         gfx.display_city_name(r.text, 2)
         gfx.display_city_temp(r.text, 2)
+        gfx.display_weather_desc(r.text, 2)
+        gfx.display_humid(r.text, 2)
+        gfx.display_wind(r.text, 2)
+        gfx.display_sun(r.text, 2)
 
-
-        # try: # send temperature data to IO
-        #     gfx.display_io_status('Sending data...')
-        #     print('Sending data to Adafruit IO...')
-        #     io.send_data(temperature_feed['key'], temperature)
-        #     print('Data sent!')
-        #     gfx.display_io_status('Data sent!')
-        # except AdafruitIO_RequestError as e:
-        #     raise AdafruitIO_RequestError('IO Error: ', e)
     except (ValueError, RuntimeError) as e: # WiFi Connection Failure
         print("Failed to get data, retrying\n", e)
         wifi.reset()
