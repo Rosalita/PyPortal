@@ -13,7 +13,7 @@ import busio
 from digitalio import DigitalInOut
 from analogio import AnalogIn
 import adafruit_adt7410
-
+import json
 from adafruit_esp32spi import adafruit_esp32spi, adafruit_esp32spi_wifimanager
 from adafruit_io.adafruit_io import RESTClient, AdafruitIO_RequestError
 import adafruit_esp32spi.adafruit_esp32spi_requests as requests
@@ -95,22 +95,61 @@ while True:
         CITY_1_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_1_ID+"&APPID="+OPEN_WEATHER_KEY
         print("Fetching text from", CITY_1_URL)
         r = requests.get(CITY_1_URL)
-        gfx.display_city_name(r.text, 1)
-        gfx.display_city_temp(r.text, 1)
-        gfx.display_weather_desc(r.text, 1)
-        gfx.display_humid(r.text, 1)
-        gfx.display_wind(r.text, 1)
-        gfx.display_sun(r.text, 1)
+        json1 = json.loads(r.text)
+        print(json)
+
+        gfx.display_city_name(json1["name"], 1)
+        gfx.display_city_temp(json1["main"]["temp"], 1)
+
+        first_desc1 = json1["weather"][0]["description"]
+
+        if len(first_desc1) > 18:
+            words = first_desc1.split(" ", 2)
+            if len(words) == 2:
+                line1 = words[0]
+                gfx.display_weather_desc(line1, 1)
+                line2 = words[1]
+                gfx.display_weather_additional_desc(line2, 1)
+            if len(words) == 3:
+                line1 = words[0] + " " + words[1]
+                line2 = words[2]
+        else:
+            gfx.display_weather_desc(first_desc1, 1)
+
+            if len(json1["weather"]) > 1:
+                gfx.display_weather_additional_desc(json1["weather"][1]["description"],1)
+
+        gfx.display_humid(json1["main"]["humidity"], 1)
+        gfx.display_wind(json1["wind"]["speed"], 1)
+      
 
         CITY_2_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_2_ID+"&APPID="+OPEN_WEATHER_KEY
         print("Fetching text from", CITY_2_URL)
         r = requests.get(CITY_2_URL)
-        gfx.display_city_name(r.text, 2)
-        gfx.display_city_temp(r.text, 2)
-        gfx.display_weather_desc(r.text, 2)
-        gfx.display_humid(r.text, 2)
-        gfx.display_wind(r.text, 2)
-        gfx.display_sun(r.text, 2)
+        json2 = json.loads(r.text)
+        gfx.display_city_name(json2["name"], 2)
+        gfx.display_city_temp(json2["main"]["temp"], 2)
+
+        first_desc2 = json2["weather"][0]["description"]
+
+        if len(first_desc2) > 18:
+            words = first_desc2.split(" ", 2)
+            if len(words) == 2:
+                line1 = words[0]
+                gfx.display_weather_desc(line1, 2)
+                line2 = words[1]
+                gfx.display_weather_additional_desc(line2, 2)
+            if len(words) == 3:
+                line1 = words[0] + " " + words[1]
+                line2 = words[2]
+        else:
+            gfx.display_weather_desc(first_desc2, 2)
+
+            if len(json2["weather"]) > 1:
+                gfx.display_weather_additional_desc(json2["weather"][1]["description"],2)
+
+        gfx.display_humid(json2["main"]["humidity"], 2)
+        gfx.display_wind(json2["wind"]["speed"], 2)
 
     except (ValueError, RuntimeError) as e: # WiFi Connection Failure
         print("Failed to get data, retrying\n", e)
