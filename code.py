@@ -112,7 +112,9 @@ while True:
                 gfx.display_weather_additional_desc(line2, 1)
             if len(words) == 3:
                 line1 = words[0] + " " + words[1]
+                gfx.display_weather_desc(line1, 1)
                 line2 = words[2]
+                gfx.display_weather_additional_desc(line2, 1)
         else:
             gfx.display_weather_desc(first_desc1, 1)
 
@@ -141,7 +143,9 @@ while True:
                 gfx.display_weather_additional_desc(line2, 2)
             if len(words) == 3:
                 line1 = words[0] + " " + words[1]
+                gfx.display_weather_desc(line1, 2)
                 line2 = words[2]
+                gfx.display_weather_additional_desc(line2, 2)
         else:
             gfx.display_weather_desc(first_desc2, 2)
 
