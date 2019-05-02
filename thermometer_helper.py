@@ -31,7 +31,6 @@ class Thermometer_GFX(displayio.Group):
         self._celsius = celsius
         self._usa_date = usa_date
      
-
         # create background icon group
         self._icon_group = displayio.Group(max_size=1)
         self.append(self._icon_group)
@@ -46,7 +45,6 @@ class Thermometer_GFX(displayio.Group):
         self._cwd = cwd
         self.set_icon(self._cwd+"/icons/pyportal_splash.bmp")
   
-
         print('loading fonts...')
         self.info_font = bitmap_font.load_font(info_font)
         self.info_font.load_glyphs(glyphs)
@@ -61,29 +59,34 @@ class Thermometer_GFX(displayio.Group):
         print('setting up labels...')
 
         self.date_text = Label(self.info_font, max_glyphs=40)
-        self.date_text.x = 90
+        self.date_text.x = 10
         self.date_text.y = 15
         self._text_group.append(self.date_text)
 
         self.time_text = Label(self.info_font, max_glyphs=40)
-        self.time_text.x = 115
-        self.time_text.y = 35
+        self.time_text.x = 120
+        self.time_text.y = 15
         self._text_group.append(self.time_text)
 
         self.city1_name = Label(self.small_font, max_glyphs=40)
         self.city1_name.x = 10
-        self.city1_name.y = 100
+        self.city1_name.y = 80
         self._text_group.append(self.city1_name)
 
         self.city1_temp = Label(self.small_font, max_glyphs=40)
         self.city1_temp.x = 10
-        self.city1_temp.y = 120
+        self.city1_temp.y = 100
         self._text_group.append(self.city1_temp)
 
         self.city1_desc = Label(self.small_font, max_glyphs=40)
         self.city1_desc.x = 10
-        self.city1_desc.y = 140
+        self.city1_desc.y = 120
         self._text_group.append(self.city1_desc)
+
+        self.city1_additional_desc = Label(self.small_font, max_glyphs=40)
+        self.city1_additional_desc.x = 10
+        self.city1_additional_desc.y = 140
+        self._text_group.append(self.city1_additional_desc)
 
         self.city1_humid = Label(self.small_font, max_glyphs=40)
         self.city1_humid.x = 10
@@ -100,51 +103,45 @@ class Thermometer_GFX(displayio.Group):
         self.city1_sunrise.y = 200
         self._text_group.append(self.city1_sunrise)
 
-        self.city1_sunset = Label(self.small_font, max_glyphs=40)
-        self.city1_sunset.x = 10
-        self.city1_sunset.y = 220
-        self._text_group.append(self.city1_sunset)
-
 
         self.city2_name = Label(self.small_font, max_glyphs=40)
-        self.city2_name.x = 175
-        self.city2_name.y = 100
+        self.city2_name.x = 170
+        self.city2_name.y = 80
         self._text_group.append(self.city2_name)
 
         self.city2_temp = Label(self.small_font, max_glyphs=40)
-        self.city2_temp.x = 175
-        self.city2_temp.y = 120
+        self.city2_temp.x = 170
+        self.city2_temp.y = 100
         self._text_group.append(self.city2_temp)
 
         self.city2_desc = Label(self.small_font, max_glyphs=40)
-        self.city2_desc.x = 175
-        self.city2_desc.y = 140
+        self.city2_desc.x = 170
+        self.city2_desc.y = 120
         self._text_group.append(self.city2_desc)
 
+        self.city2_additional_desc = Label(self.small_font, max_glyphs=40)
+        self.city2_additional_desc.x = 170
+        self.city2_additional_desc.y = 140
+        self._text_group.append(self.city2_additional_desc)
+
         self.city2_humid = Label(self.small_font, max_glyphs=40)
-        self.city2_humid.x = 175
+        self.city2_humid.x = 170
         self.city2_humid.y = 160
         self._text_group.append(self.city2_humid)
 
         self.city2_wind = Label(self.small_font, max_glyphs=40)
-        self.city2_wind.x = 175
+        self.city2_wind.x = 170
         self.city2_wind.y = 180
         self._text_group.append(self.city2_wind)
 
         self.city2_sunrise = Label(self.small_font, max_glyphs=40)
-        self.city2_sunrise.x = 175
+        self.city2_sunrise.x = 170
         self.city2_sunrise.y = 200
         self._text_group.append(self.city2_sunrise)
 
-        self.city2_sunset = Label(self.small_font, max_glyphs=40)
-        self.city2_sunset.x = 175
-        self.city2_sunset.y = 220
-        self._text_group.append(self.city2_sunset)
-
-
         # add flag images to the text group
-        self.add_flag("/icons/brit.bmp", 10, 36)
-        self.add_flag("/icons/finn.bmp", 175, 36)
+        self.add_flag("/icons/brit.bmp", 10, 24)
+        self.add_flag("/icons/finn.bmp", 170, 24)
 
 
         board.DISPLAY.show(self._text_group)
@@ -179,26 +176,19 @@ class Thermometer_GFX(displayio.Group):
         """
         self.io_status_text.text = status_text
 
-    def display_city_name(self, response_text, cityNum):
+    def display_city_name(self, name, cityNum):
         """Displays the name of the city
 
         """
-        data = response_text.split(",")
-        name_string = data[24].split(":")
-        name = name_string[1]
-        name = name.strip('\"')
         
         if cityNum == 1:
             self.city1_name.text = name
         elif cityNum == 2:
             self.city2_name.text = name
     
-    def display_city_temp(self, response_text, cityNum):
+    def display_city_temp(self, temp_kelvin, cityNum):
         """Displays the temperature in the city
         """
-        data = response_text.split(",")
-        temp_string = data[7].split(":")
-        temp_kelvin = temp_string[2]
         temp = float(temp_kelvin) - 273.15
         temp = (round(temp, 2))
 
@@ -218,67 +208,49 @@ class Thermometer_GFX(displayio.Group):
             self.city2_temp.text = str(temp)+"C"
 
 
-    def display_weather_desc(self, response_text, cityNum):
+    def display_weather_desc(self, desc, cityNum):
         """Displays the description of the weather
 
         """
-        data = response_text.split(",")
-        desc_string = data[4].split(":")
-        desc = desc_string[1]
-        desc = desc.strip('\"')
-        
+
         if cityNum == 1:
             self.city1_desc.text = desc
         elif cityNum == 2:
             self.city2_desc.text = desc
+
+    def display_weather_additional_desc(self, desc, cityNum):
+        """Displays the description of the weather
+
+        """
+
+        if cityNum == 1:
+            self.city1_additional_desc.text = desc
+        elif cityNum == 2:
+            self.city2_additional_desc.text = desc
     
-    def display_humid(self, response_text, cityNum):
+    def display_humid(self, humidity, cityNum):
         """Displays the humidity %
         """
-        data = response_text.split(",")
-        humid_string = data[9].split(":")
-        humid = humid_string[1]
-        humid = "humidity: "+ humid +"%"
+     
+        humid_str = str(humidity)
+        humid = "humidity "+ humid_str +"%"
 
         if cityNum == 1:
             self.city1_humid.text = humid
         elif cityNum == 2:
             self.city2_humid.text = humid
 
-    def display_wind(self, response_text, cityNum):
+    def display_wind(self, wind_ms, cityNum):
         """Displays the wind speed
         """
-        data = response_text.split(",")
-        wind_string = data[13].split(":")
-        wind_ms = wind_string[2]
         wind_mph = float(wind_ms) * 2.2369362912
         wind_mph = (round(wind_mph, 2))
-
-        wind = "wind: "+ str(wind_mph) +" MPH"
+        wind = "wind "+ str(wind_mph) +" MPH"
 
         if cityNum == 1:
             self.city1_wind.text = wind
         elif cityNum == 2:
             self.city2_wind.text = wind
-    
-    def display_sun(self, response_text, cityNum):
-        """Displays the sun rise and sun set times in local time
-        """
-
-        data = response_text.split(",")
-        sunrise_string = data[21].split(":")
-        sunrise = sunrise_string[1]
-        sunset_string = data[22].split(":")
-        sunset = sunset_string[1]
-        sunset = sunset[: len(sunset)-1] # trim trailing } char
-
-        if cityNum == 1:
-            self.city1_sunrise.text = "sunrise: "+sunrise
-            self.city1_sunset.text = "sunset: "+sunset
-        elif cityNum == 2:
-            self.city2_sunrise.text = "sunrise: "+sunrise
-            self.city2_sunset.text = "sunset: "+sunset
-
 
     def set_icon(self, filename):
         """Sets the background image to a bitmap file.
