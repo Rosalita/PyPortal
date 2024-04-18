@@ -1,8 +1,8 @@
 """
-PyPortal Weather Comparision
+PyPortal Weather
 ==============================================
 Uses open weather map API https://openweathermap.org
-To display weather information for two locations side by side
+To display weather information
 
 Author: Rosie Hamilton
 """
@@ -22,7 +22,7 @@ import adafruit_esp32spi.adafruit_esp32spi_requests as requests
 import thermometer_helper
 
 # rate at which to refresh the pyportal screen, in seconds
-PYPORTAL_REFRESH = 2
+PYPORTAL_REFRESH = 300 # 5 mins
 
 # Get wifi details and more from a secrets.py file
 try:
@@ -51,10 +51,8 @@ except KeyError:
     raise KeyError('To use this code, you need to include your Adafruit IO username \
 and password in a secrets.py file on the CIRCUITPY drive.')
 
-# use https://openweathermap.org/find?q= to get city IDs
-# then set both city IDs below
-CITY_1_ID = '2641673'
-CITY_2_ID = '658225'
+HOME_LAT = '53.43765'
+HOME_LON = '-2.28148'
 
 # Create an instance of the Adafruit IO REST client
 io = RESTClient(ADAFRUIT_IO_USER, ADAFRUIT_IO_KEY, wifi)
@@ -82,8 +80,6 @@ def set_backlight(val):
     board.DISPLAY.brightness = val
 
 while True:
-
-    
     try: # WiFi Connection
         set_backlight(1)
 
@@ -92,68 +88,41 @@ while True:
         print('displaying time...')
         gfx.display_date_time(datetime)
 
-        CITY_1_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_1_ID+"&APPID="+OPEN_WEATHER_KEY
-        print("Fetching text from", CITY_1_URL)
-        r = requests.get(CITY_1_URL)
-        json1 = json.loads(r.text)
-        print(json)
+        CURRENT_WEATHER_URL = "https://api.openweathermap.org/data/2.5/weather?lat="+HOME_LAT+"&lon="+HOME_LON+"&appid="+OPEN_WEATHER_KEY
 
-        gfx.display_city_name(json1["name"], 1)
-        gfx.display_city_temp(json1["main"]["temp"], 1)
+        print("Fetching text from", CURRENT_WEATHER_URL)
+        r = requests.get(CURRENT_WEATHER_URL)
+        payload = json.loads(r.text)
+        print(payload)
 
-        first_desc1 = json1["weather"][0]["description"]
+        gfx.display_weather_icon(payload["weather"][0]["icon"], 120, 24)
+        gfx.display_place_name(payload["name"])
+        gfx.display_temp(payload["main"]["temp"],payload["main"]["feels_like"])
 
-        if len(first_desc1) > 18:
-            words = first_desc1.split(" ", 2)
+        first_desc = payload["weather"][0]["description"]
+
+        if len(first_desc) > 18:
+            words = first_desc.split(" ", 2)
             if len(words) == 2:
                 line1 = words[0]
-                gfx.display_weather_desc(line1, 1)
+                gfx.display_weather_desc(line1)
                 line2 = words[1]
-                gfx.display_weather_additional_desc(line2, 1)
+                gfx.display_weather_additional_desc(line2)
             if len(words) == 3:
                 line1 = words[0] + " " + words[1]
-                gfx.display_weather_desc(line1, 1)
+                gfx.display_weather_desc(line1)
                 line2 = words[2]
-                gfx.display_weather_additional_desc(line2, 1)
+                gfx.display_weather_additional_desc(line2)
         else:
-            gfx.display_weather_desc(first_desc1, 1)
+            gfx.display_weather_desc(first_desc)
 
-            if len(json1["weather"]) > 1:
-                gfx.display_weather_additional_desc(json1["weather"][1]["description"],1)
+            if len(payload["weather"]) > 1:
+                gfx.display_weather_additional_desc(payload["weather"][1]["description"])
 
-        gfx.display_humid(json1["main"]["humidity"], 1)
-        gfx.display_wind(json1["wind"]["speed"], 1)
-      
-
-        CITY_2_URL = "http://api.openweathermap.org/data/2.5/weather?id="+CITY_2_ID+"&APPID="+OPEN_WEATHER_KEY
-        print("Fetching text from", CITY_2_URL)
-        r = requests.get(CITY_2_URL)
-        json2 = json.loads(r.text)
-        gfx.display_city_name(json2["name"], 2)
-        gfx.display_city_temp(json2["main"]["temp"], 2)
-
-        first_desc2 = json2["weather"][0]["description"]
-
-        if len(first_desc2) > 18:
-            words = first_desc2.split(" ", 2)
-            if len(words) == 2:
-                line1 = words[0]
-                gfx.display_weather_desc(line1, 2)
-                line2 = words[1]
-                gfx.display_weather_additional_desc(line2, 2)
-            if len(words) == 3:
-                line1 = words[0] + " " + words[1]
-                gfx.display_weather_desc(line1, 2)
-                line2 = words[2]
-                gfx.display_weather_additional_desc(line2, 2)
-        else:
-            gfx.display_weather_desc(first_desc2, 2)
-
-            if len(json2["weather"]) > 1:
-                gfx.display_weather_additional_desc(json2["weather"][1]["description"],2)
-
-        gfx.display_humid(json2["main"]["humidity"], 2)
-        gfx.display_wind(json2["wind"]["speed"], 2)
+        gfx.display_humid(payload["main"]["humidity"])
+        gfx.display_wind(payload["wind"]["speed"])
+        gfx.display_cloud(payload["clouds"]["all"])
+        gfx.display_sunrise_sunset(payload["sys"]["sunrise"],payload["sys"]["sunset"])
 
     except (ValueError, RuntimeError) as e: # WiFi Connection Failure
         print("Failed to get data, retrying\n", e)
